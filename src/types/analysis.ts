@@ -72,3 +72,34 @@ export interface SkillGap {
   importance: 'critical' | 'important' | 'nice-to-have'
   suggestion: string
 }
+
+// Section Analysis Types
+export interface SectionAnalysis {
+  hasEducation: boolean
+  hasExperience: boolean
+  hasSkills: boolean
+  hasProjects: boolean
+  educationDetails?: SectionDetails
+  experienceDetails?: SectionDetails
+  skillsDetails?: SectionDetails
+  projectsDetails?: SectionDetails
+  missingSections: string[]
+  weakSections: string[]
+  suggestions: SectionSuggestion[]
+}
+
+export interface SectionDetails {
+  present: boolean
+  content: string
+  quality: 'strong' | 'moderate' | 'weak'
+  wordCount: number
+  keyPoints: string[]
+}
+
+export interface SectionSuggestion {
+  section: string
+  type: 'missing' | 'weak'
+  title: string
+  description: string
+  priority: 'high' | 'medium' | 'low'
+}

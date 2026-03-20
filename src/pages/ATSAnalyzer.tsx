@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Target, Lightbulb, TrendingUp } from 'lucide-react'
+import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Target, Lightbulb, TrendingUp, Layout } from 'lucide-react'
 import { FileParserService } from '@/services/fileParserService'
 import { ATSAnalyzerService } from '@/services/atsAnalyzerService'
-import { ATSAnalysis } from '@/types/analysis'
+import { SectionAnalyzerService } from '@/services/sectionAnalyzerService'
+import { ATSAnalysis, SectionAnalysis } from '@/types/analysis'
 import { cn } from '@/lib/utils'
-import { ScoreBreakdown, ScoreChartCombined, ScoreData, ScoreCategory } from '@/components/ats'
+import { ScoreBreakdown, ScoreChartCombined, ScoreData, ScoreCategory, SectionAnalyzer } from '@/components/ats'
 
 export default function ATSAnalyzer() {
   const [file, setFile] = useState<File | null>(null)
   const [analysis, setAnalysis] = useState<ATSAnalysis | null>(null)
+  const [sectionAnalysis, setSectionAnalysis] = useState<SectionAnalysis | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -49,7 +51,10 @@ export default function ATSAnalyzer() {
         throw new Error(parseResult.error || 'Failed to parse file')
       }
 
-      const analysisResult = ATSAnalyzerService.analyzeResume(parseResult.text)
+      const resumeText = parseResult.text
+      
+      // Run ATS analysis
+      const analysisResult = ATSAnalyzerService.analyzeResume(resumeText)
 
       setAnalysis({
         id: Date.now().toString(),
@@ -57,6 +62,10 @@ export default function ATSAnalyzer() {
         ...analysisResult,
         analyzedAt: new Date(),
       } as ATSAnalysis)
+
+      // Run section analysis
+      const sectionResult = SectionAnalyzerService.analyzeSections(resumeText)
+      setSectionAnalysis(sectionResult)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analysis failed')
     } finally {
@@ -325,6 +334,20 @@ export default function ATSAnalyzer() {
             
             <ScoreChartCombined data={scoreChartData} />
           </div>
+
+          {/* Section Analysis */}
+          {sectionAnalysis && (
+            <div className="relative p-6 md:p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-border/50 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <h3 className="relative text-xl font-semibold mb-6 flex items-center gap-2">
+                <Layout className="w-5 h-5 text-primary" />
+                Section Analysis
+              </h3>
+              
+              <SectionAnalyzer analysis={sectionAnalysis} />
+            </div>
+          )}
 
           {/* Keywords */}
           <div className="relative p-6 md:p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-border/50 group">
