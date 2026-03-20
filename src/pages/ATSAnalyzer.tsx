@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Target, Lightbulb, TrendingUp } from 'lucide-react'
 import { FileParserService } from '@/services/fileParserService'
 import { ATSAnalyzerService } from '@/services/atsAnalyzerService'
 import { ATSAnalysis } from '@/types/analysis'
 import { cn } from '@/lib/utils'
+import { ScoreBreakdown, ScoreChartCombined, ScoreData, ScoreCategory } from '@/components/ats'
 
 export default function ATSAnalyzer() {
   const [file, setFile] = useState<File | null>(null)
@@ -74,6 +75,68 @@ export default function ATSAnalyzer() {
     if (score >= 60) return { title: 'Good', desc: 'But there are areas for improvement.' }
     return { title: 'Needs Work', desc: 'Improvements needed to pass ATS screening.' }
   }
+
+  /**
+   * Maps existing ATS breakdown scores to 4 display categories.
+   * 
+   * Weight distribution rationale:
+   * - Formatting: 70% formatting + 30% file format (combined ATS readability)
+   * - Keywords: Direct mapping of keyword optimization score
+   * - Experience: Direct mapping of work history clarity score
+   * - Skills: 60% keywords + 40% contact (skills inferred from both sources)
+   */
+  const getScoreCategories = (): ScoreCategory[] => {
+    if (!analysis?.breakdown) return []
+    
+    const breakdown = analysis.breakdown
+    
+    // Get raw percentage values (each is 0-100)
+    const formattingPct = breakdown.formatting?.percentage ?? 0
+    const fileFormatPct = breakdown.fileFormat?.percentage ?? 0
+    const keywordsPct = breakdown.keywords?.percentage ?? 0
+    const structurePct = breakdown.structure?.percentage ?? 0
+    const contactPct = breakdown.contact?.percentage ?? 0
+    
+    return [
+      {
+        id: 'formatting',
+        name: 'Formatting Score',
+        value: Math.round(formattingPct * 0.7 + fileFormatPct * 0.3),
+        description: 'Resume file format and layout structure'
+      },
+      {
+        id: 'keywords',
+        name: 'Keyword Match',
+        value: Math.round(keywordsPct),
+        description: 'ATS-recognized keywords optimization'
+      },
+      {
+        id: 'experience',
+        name: 'Experience Strength',
+        value: Math.round(structurePct),
+        description: 'Work history clarity and progression'
+      },
+      {
+        id: 'skills',
+        name: 'Skills Match',
+        value: Math.round(keywordsPct * 0.6 + contactPct * 0.4),
+        description: 'Skills alignment with job requirements'
+      }
+    ]
+  }
+
+  const getScoreChartData = (): ScoreData[] => {
+    const categories = getScoreCategories()
+    return categories.map(cat => ({
+      category: cat.name.replace(' Score', '').replace(' Match', '').replace(' Strength', ''),
+      value: cat.value,
+      fullMark: 100
+    }))
+  }
+
+  // Memoize computed data to prevent unnecessary recalculations
+  const scoreCategories = useMemo(() => getScoreCategories(), [analysis?.breakdown])
+  const scoreChartData = useMemo(() => getScoreChartData(), [analysis?.breakdown])
 
   return (
     <div className="space-y-8">
@@ -167,101 +230,100 @@ export default function ATSAnalyzer() {
 
       {/* Analysis Results */}
       {analysis && (
-        <div className="grid gap-6 lg:grid-cols-2 animate-fade-in-up">
-          {/* Score Display */}
+        <div className="grid gap-6 animate-fade-in-up">
+          {/* Score Display with Breakdown */}
           <div className="relative p-6 md:p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-border/50 group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
-            <h3 className="relative text-xl font-semibold mb-6 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              ATS Score
-            </h3>
-            
-            <div className="flex items-center justify-center mb-6">
-              <div className="relative">
-                {/* Glow effect */}
-                <div className={cn(
-                  "absolute inset-0 bg-gradient-to-br rounded-full blur-2xl opacity-20",
-                  getScoreColor(analysis.score)
-                )} />
+            <div className="flex flex-col lg:flex-row gap-8 items-center">
+              {/* Main Score Circle */}
+              <div className="flex-shrink-0">
+                <h3 className="relative text-xl font-semibold mb-6 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  ATS Score
+                </h3>
                 
-                <div className="relative w-40 h-40 md:w-48 md:h-48">
-                  <svg className="w-full h-full circular-progress">
-                    <circle
-                      cx="80"
-                      cy="80"
-                      r="70"
-                      stroke="currentColor"
-                      strokeWidth="10"
-                      fill="transparent"
-                      className="text-muted/20"
-                    />
-                    <circle
-                      cx="80"
-                      cy="80"
-                      r="70"
-                      stroke="currentColor"
-                      strokeWidth="10"
-                      fill="transparent"
-                      strokeDasharray={`${(analysis.score / 100) * 440} 440`}
-                      strokeLinecap="round"
-                      className={cn(
-                        "transition-all duration-1000 ease-out",
-                        getScoreColor(analysis.score).split(' ')[0].replace('from-', 'text-')
-                      )}
-                      style={{
-                        strokeDashoffset: 0,
-                        filter: `drop-shadow(0 0 8px hsl(var(--primary) / 0.5))`,
-                      }}
-                    />
-                  </svg>
-                  
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-5xl font-bold text-gradient">{analysis.score}</span>
-                    <span className="text-sm text-muted-foreground">out of 100</span>
+                <div className="flex items-center justify-center mb-6">
+                  <div className="relative">
+                    {/* Glow effect */}
+                    <div className={cn(
+                      "absolute inset-0 bg-gradient-to-br rounded-full blur-2xl opacity-20",
+                      getScoreColor(analysis.score)
+                    )} />
+                    
+                    <div className="relative w-40 h-40 md:w-48 md:h-48">
+                      <svg className="w-full h-full circular-progress">
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="70"
+                          stroke="currentColor"
+                          strokeWidth="10"
+                          fill="transparent"
+                          className="text-muted/20"
+                        />
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="70"
+                          stroke="currentColor"
+                          strokeWidth="10"
+                          fill="transparent"
+                          strokeDasharray={`${(analysis.score / 100) * 440} 440`}
+                          strokeLinecap="round"
+                          className={cn(
+                            "transition-all duration-1000 ease-out",
+                            getScoreColor(analysis.score).split(' ')[0].replace('from-', 'text-')
+                          )}
+                          style={{
+                            strokeDashoffset: 0,
+                            filter: `drop-shadow(0 0 8px hsl(var(--primary) / 0.5))`,
+                          }}
+                        />
+                      </svg>
+                      
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-4xl font-bold text-foreground">{analysis.score}%</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
+                
+                <div className="text-center">
+                  <p className={cn(
+                    "text-lg font-semibold",
+                    analysis.score >= 80 ? "text-green-600" : analysis.score >= 60 ? "text-yellow-600" : "text-red-500"
+                  )}>
+                    {getScoreMessage(analysis.score).title}
+                  </p>
+                  <p className="text-muted-foreground">
+                    {getScoreMessage(analysis.score).desc}
+                  </p>
+                </div>
               </div>
-            </div>
-            
-            <div className="text-center">
-              <p className={cn(
-                "text-lg font-semibold",
-                analysis.score >= 80 ? "text-green-600" : analysis.score >= 60 ? "text-yellow-600" : "text-red-500"
-              )}>
-                {getScoreMessage(analysis.score).title}
-              </p>
-              <p className="text-muted-foreground">
-                {getScoreMessage(analysis.score).desc}
-              </p>
+
+              {/* Score Breakdown with Circular Progress */}
+              <div className="flex-1 w-full">
+                <h3 className="relative text-xl font-semibold mb-6 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-primary" />
+                  Score Breakdown
+                </h3>
+                
+                <ScoreBreakdown categories={scoreCategories} />
+              </div>
             </div>
           </div>
 
-          {/* Breakdown */}
+          {/* Animated Chart Visualization */}
           <div className="relative p-6 md:p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-border/50 group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
             <h3 className="relative text-xl font-semibold mb-6 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              Score Breakdown
+              Score Visualization
             </h3>
             
-            <div className="space-y-5">
-              {Object.entries(analysis.breakdown).map(([key, value]) => (
-                <div key={key}>
-                  <div className="flex justify-between mb-2">
-                    <span className="capitalize font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                    <span className="font-semibold text-primary">{value.percentage.toFixed(0)}%</span>
-                  </div>
-                  <div className="relative h-2 bg-muted/30 rounded-full overflow-hidden">
-                    <div
-                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${value.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ScoreChartCombined data={scoreChartData} />
           </div>
 
           {/* Keywords */}
