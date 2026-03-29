@@ -1,4 +1,4 @@
-import { SignUp, SignedIn } from '@clerk/clerk-react'
+import { SignUp, Show } from '@clerk/react'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { Rocket } from 'lucide-react'
@@ -16,9 +16,9 @@ function RedirectToDashboard() {
 export default function SignUpPage() {
   return (
     <>
-      <SignedIn>
+      <Show when="signed-in">
         <RedirectToDashboard />
-      </SignedIn>
+      </Show>
       
       <div className="min-h-screen relative overflow-hidden bg-background">
         {/* Background */}

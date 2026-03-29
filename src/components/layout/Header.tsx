@@ -1,4 +1,4 @@
-import { UserButton } from '@clerk/clerk-react'
+import { UserButton } from '@clerk/react'
 import { Menu, X, Rocket, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
