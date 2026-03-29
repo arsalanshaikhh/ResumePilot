@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { FileText, Briefcase, CheckCircle, Zap, Shield, BarChart, ArrowRight, Sparkles, Star, ChevronRight } from 'lucide-react'
+import { FileText, Briefcase, CheckCircle, Zap, Shield, BarChart, ArrowRight, Sparkles, Star, ChevronRight, LayoutDashboard } from 'lucide-react'
 import { useState } from 'react'
+import { Show, UserButton, useUser } from '@clerk/react'
 
 const features = [
   {
@@ -52,6 +53,7 @@ const testimonials = [
 
 export default function Home() {
   const [activeFeature, setActiveFeature] = useState<number | null>(null)
+  const { user } = useUser()
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -87,18 +89,30 @@ export default function Home() {
             </Link>
             
             <div className="flex items-center gap-4">
-              <Link
-                to="/sign-in"
-                className="px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/sign-up"
-                className="px-5 py-2.5 text-sm font-medium bg-gradient-to-r from-primary to-primary/90 text-white rounded-xl hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300"
-              >
-                Get Started
-              </Link>
+              <Show when="signed-out">
+                <Link
+                  to="/sign-in"
+                  className="px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/sign-up"
+                  className="px-5 py-2.5 text-sm font-medium bg-gradient-to-r from-primary to-primary/90 text-white rounded-xl hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300"
+                >
+                  Get Started
+                </Link>
+              </Show>
+              <Show when="signed-in">
+                <Link
+                  to="/dashboard"
+                  className="px-5 py-2.5 text-sm font-medium bg-gradient-to-r from-primary to-primary/90 text-white rounded-xl hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </Link>
+                <UserButton />
+              </Show>
             </div>
           </div>
         </nav>
@@ -112,6 +126,14 @@ export default function Home() {
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-primary">AI-Powered Resume Optimization</span>
           </div>
+
+          {/* Personalized welcome for authenticated users */}
+          <Show when="signed-in">
+            <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-green-500/10 border border-green-500/20 backdrop-blur-sm animate-fade-in">
+              <CheckCircle className="w-4 h-4 text-green-500" />
+              <span className="text-sm font-medium text-green-600">Welcome back, {user?.firstName || 'User'}!</span>
+            </div>
+          </Show>
           
           {/* Main heading */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8 animate-fade-in-up">
@@ -129,23 +151,38 @@ export default function Home() {
           
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-300">
-            <Link
-              to="/sign-up"
-              className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-1"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80" />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-              <span className="relative flex items-center gap-2">
-                Get Started Free
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </Link>
-            <Link
-              to="/sign-in"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-foreground bg-white/50 backdrop-blur-sm border border-border rounded-2xl hover:bg-white/80 hover:border-primary/30 transition-all duration-300"
-            >
-              Sign In
-            </Link>
+            <Show when="signed-out">
+              <Link
+                to="/sign-up"
+                className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-1"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <span className="relative flex items-center gap-2">
+                  Get Started Free
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </Link>
+              <Link
+                to="/sign-in"
+                className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-foreground bg-white/50 backdrop-blur-sm border border-border rounded-2xl hover:bg-white/80 hover:border-primary/30 transition-all duration-300"
+              >
+                Sign In
+              </Link>
+            </Show>
+            <Show when="signed-in">
+              <Link
+                to="/dashboard"
+                className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-1"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <span className="relative flex items-center gap-2">
+                  Go to Dashboard
+                  <LayoutDashboard className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </Link>
+            </Show>
           </div>
 
           {/* Stats */}
@@ -281,13 +318,24 @@ export default function Home() {
             <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-10">
               Join thousands of job seekers who have improved their resumes with ResumePilot.
             </p>
-            <Link
-              to="/sign-up"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-primary bg-white rounded-2xl hover:shadow-xl hover:shadow-white/20 hover:-translate-y-1 transition-all duration-300"
-            >
-              Start Free Trial
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Link>
+            <Show when="signed-out">
+              <Link
+                to="/sign-up"
+                className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-primary bg-white rounded-2xl hover:shadow-xl hover:shadow-white/20 hover:-translate-y-1 transition-all duration-300"
+              >
+                Start Free Trial
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+            </Show>
+            <Show when="signed-in">
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-primary bg-white rounded-2xl hover:shadow-xl hover:shadow-white/20 hover:-translate-y-1 transition-all duration-300"
+              >
+                Go to Dashboard
+                <LayoutDashboard className="w-5 h-5 ml-2" />
+              </Link>
+            </Show>
           </div>
         </div>
       </section>
