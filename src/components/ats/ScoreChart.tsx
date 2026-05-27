@@ -82,15 +82,6 @@ const colors = [
   '#3B82F6', // Blue
 ]
 
-// Get gradient color based on score value
-const getGradientColor = (value: number): string => {
-  if (value >= 90) return '#10B981' // Emerald - excellent
-  if (value >= 80) return '#14B8A6' // Teal - great
-  if (value >= 70) return '#3B82F6' // Blue - good
-  if (value >= 60) return '#F59E0B' // Amber - okay
-  if (value >= 50) return '#F97316' // Orange - below average
-  return '#EF4444' // Red - needs improvement
-}
 
 // Get a vibrant color from palette based on index
 const getColorByIndex = (index: number): string => {
@@ -99,7 +90,7 @@ const getColorByIndex = (index: number): string => {
 
 // Generate gradient colors for bar chart
 const getBarGradientColors = (data: ScoreData[]) => {
-  return data.map((item, index) => getColorByIndex(index))
+  return data.map((_item, index) => getColorByIndex(index))
 }
 
 export function ScoreChart({ 
@@ -128,18 +119,6 @@ export function ScoreChart({
 
     let plotData: PlotlyData[]
     let layout: PlotlyLayout
-
-    // Animation settings
-    const animationConfig = showAnimation ? {
-      transition: {
-        duration: 800,
-        easing: 'cubic-in-out'
-      },
-      frame: {
-        duration: 800,
-        redraw: true
-      }
-    } : {}
 
     if (type === 'radar') {
       // Enhanced Radar chart with multiple traces for visual appeal
@@ -337,7 +316,7 @@ export function ScoreChart({
     const dataChanged = JSON.stringify(prevDataRef.current) !== JSON.stringify(data)
     prevDataRef.current = data
 
-    if (chartElement && hasData && !dataChanged) {
+    if (chartElement && hasData && dataChanged) {
       window.Plotly.react(chartElement, plotData, layout, config)
     } else if (chartElement) {
       window.Plotly.newPlot(chartElement, plotData, layout, config)

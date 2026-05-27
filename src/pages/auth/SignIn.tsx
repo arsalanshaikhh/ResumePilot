@@ -1,5 +1,5 @@
 import { SignIn, Show } from '@clerk/react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useEffect } from 'react'
 import { Rocket } from 'lucide-react'
 
@@ -86,9 +86,9 @@ export default function SignInPage() {
             {/* Footer */}
             <p className="text-center mt-8 text-muted-foreground animate-fade-in animation-delay-300">
               Don't have an account?{' '}
-              <a href="/sign-up" className="text-primary font-medium hover:text-primary/80 transition-colors">
+              <Link to="/sign-up" className="text-primary font-medium hover:text-primary/80 transition-colors">
                 Sign up for free
-              </a>
+              </Link>
             </p>
           </div>
         </div>

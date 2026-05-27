@@ -72,7 +72,7 @@ export default function Header() {
             <div className="flex items-center gap-3">
               {/* User Button */}
               <div className="transform transition-transform duration-200 hover:scale-105">
-                <UserButton afterSignOutUrl="/" />
+                <UserButton />
               </div>
 
               {/* Mobile Menu Button */}

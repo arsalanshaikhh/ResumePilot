@@ -21,7 +21,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          clerk: ['@clerk/clerk-react'],
+          clerk: ['@clerk/react'],
           ui: [
             '@radix-ui/react-dialog', 
             '@radix-ui/react-dropdown-menu',

@@ -40,6 +40,9 @@ export default function ATSAnalyzer() {
     },
   })
 
+
+  // updated comment
+
   const analyzeResume = async (uploadedFile: File) => {
     setLoading(true)
     setError(null)
@@ -362,7 +365,7 @@ export default function ATSAnalyzer() {
               <div>
                 <p className="text-sm text-muted-foreground mb-3">Top Keywords Found</p>
                 <div className="flex flex-wrap gap-2">
-                  {analysis.keywords.relevantKeywords.slice(0, 10).map((keyword, index) => (
+                  {(analysis.keywords?.relevantKeywords ?? []).slice(0, 10).map((keyword, index) => (
                     <span
                       key={index}
                       className="px-3 py-1.5 bg-gradient-to-r from-primary/10 to-primary/5 text-primary rounded-full text-sm font-medium border border-primary/10 animate-fade-in"
@@ -375,7 +378,7 @@ export default function ATSAnalyzer() {
               </div>
               <div className="pt-4 border-t border-border/30">
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">{analysis.keywords.totalKeywords}</span> total keywords detected
+                  <span className="font-semibold text-foreground">{analysis.keywords?.totalKeywords ?? 0}</span> total keywords detected
                 </p>
               </div>
             </div>

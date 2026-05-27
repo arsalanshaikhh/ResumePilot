@@ -9,7 +9,7 @@ export default function Settings() {
 
   const handleSaveApiKey = () => {
     if (apiKey.trim()) {
-      localStorage.setItem('openrouter_api_key', apiKey)
+      sessionStorage.setItem('openrouter_api_key', apiKey)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     }
@@ -66,6 +66,11 @@ export default function Settings() {
                 </button>
               </div>
               
+              <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                <Shield className="w-4 h-4 flex-shrink-0 mt-0.5 text-yellow-500" />
+                Your API key is stored in session storage and cleared when you close this tab. Never share your API key.
+              </p>
+
               <button
                 onClick={handleSaveApiKey}
                 disabled={!apiKey.trim()}
