@@ -59,7 +59,9 @@ export default function JobMatcher() {
       const jobKeywords = new Set(jobWords.filter((word) => word.length > 3))
 
       const matchingKeywords = [...resumeKeywords].filter((keyword) => jobKeywords.has(keyword))
-      const matchScore = Math.round((matchingKeywords.length / jobKeywords.size) * 100)
+      const matchScore = jobKeywords.size === 0
+        ? 0
+        : Math.round((matchingKeywords.length / jobKeywords.size) * 100)
 
       const gaps = [...jobKeywords]
         .filter((keyword) => !resumeKeywords.has(keyword))

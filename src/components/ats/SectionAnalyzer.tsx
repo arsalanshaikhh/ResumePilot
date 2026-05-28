@@ -193,7 +193,7 @@ export function SectionAnalyzer({ analysis, className }: SectionAnalyzerProps) {
       )}
 
       {/* Detailed Section Analysis */}
-      <div className="relative p-6 md:p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-border/50">
+      <div className="group relative p-6 md:p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-border/50">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
         <h3 className="relative text-xl font-semibold mb-6 flex items-center gap-2">
@@ -268,7 +268,7 @@ export function SectionAnalyzer({ analysis, className }: SectionAnalyzerProps) {
 
       {/* Suggestions */}
       {analysis.suggestions.length > 0 && (
-        <div className="relative p-6 md:p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-border/50">
+        <div className="group relative p-6 md:p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-border/50">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
           <h3 className="relative text-xl font-semibold mb-6 flex items-center gap-2">

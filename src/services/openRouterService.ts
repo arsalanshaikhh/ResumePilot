@@ -118,19 +118,37 @@ Provide a detailed match analysis including score, breakdown, gaps, and strength
 
   private parseResponse(data: unknown, _analysisType: 'ats' | 'match'): AnalysisResponse {
     try {
-      const content = (data as { choices: Array<{ message: { content: string } }> }).choices[0].message.content
+      const responseData = data as {
+        choices?: Array<{ message: { content: string } }>
+        usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number }
+      }
+
+      if (!responseData.choices || responseData.choices.length === 0) {
+        return { success: false, error: 'API returned no response choices' }
+      }
+
+      let content = responseData.choices[0].message.content
+
+      // Strip markdown code fences that LLMs sometimes wrap JSON in
+      const fenceMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/)
+      if (fenceMatch) {
+        content = fenceMatch[1].trim()
+      }
+
       const parsed = JSON.parse(content)
 
-      const usageData = (data as { usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } }).usage
+      const usageData = responseData.usage
       return {
         success: true,
         data: parsed,
-        usage: {
-          promptTokens: usageData.prompt_tokens,
-          completionTokens: usageData.completion_tokens,
-          totalTokens: usageData.total_tokens,
-          cost: 0, // Cost calculation would depend on model pricing
-        },
+        usage: usageData
+          ? {
+              promptTokens: usageData.prompt_tokens,
+              completionTokens: usageData.completion_tokens,
+              totalTokens: usageData.total_tokens,
+              cost: 0,
+            }
+          : undefined,
       }
     } catch {
       return {
